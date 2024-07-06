@@ -1,0 +1,154 @@
+Topics Covered
+DDL
+DML
+
+ORM(Object Relational Mapper)
+
+create or replace
+function ticket_audit_information() returns trigger  
+ 
+as  
+ 
+$ticket_audit$
+ 
+begin
+ 
+if (TG_OP = 'DELETE') then
+ 
+insert
+    into
+    ticket_audit
+select
+    'D',
+    now(),
+    user,
+    OLD.*;
+ 
+elsif (TG_OP = 'UPDATE') then
+ 
+insert
+    into
+    ticket_audit
+select
+    'U',
+    now(),
+    user,
+    NEW.*;
+ 
+elsif (TG_OP = 'INSERT') then
+ 
+insert
+    into
+    ticket_audit
+select
+    'I',
+    now(),
+    user,
+    NEW.*;
+end if;
+ 
+return null;
+end;
+ 
+$ticket_audit$
+ 
+language plpgsql;
+
+CREATE TABLE sales (
+    sale_id SERIAL ,
+    sale_date DATE,
+    product_id INT,
+    quantity INT,
+    amount numeric,
+    PRIMARY KEY (sale_id, sale_date)
+) partition by range (sale_date);
+
+[Yesterday 4:35 PM] Sathish Kumar Thiyagarajan (Unverified)
+CREATE TABLE sales_january PARTITION OF sales
+    FOR VALUES FROM ('2023-01-01') TO ('2023-02-01');
+ 
+CREATE TABLE sales_february PARTITION OF sales
+    FOR VALUES FROM ('2023-02-01') TO ('2023-03-01');
+ 
+CREATE TABLE sales_march PARTITION OF sales
+    FOR VALUES FROM ('2023-03-01') TO ('2023-04-01');
+[Yesterday 4:36 PM] Sathish Kumar Thiyagarajan (Unverified)
+INSERT INTO sales (sale_date, product_id, quantity, amount)
+VALUES ('2023-01-15', 101, 5, 100.00);
+ 
+INSERT INTO sales (sale_date, product_id, quantity, amount)
+VALUES ('2023-02-20', 102, 10, 200.00);
+ 
+INSERT INTO sales (sale_date, product_id, quantity, amount)
+VALUES ('2023-03-10', 103, 8, 150.00);
+[Yesterday 4:43 PM] Sathish Kumar Thiyagarajan (Unverified)
+ALTER TABLE sales_january ADD CONSTRAINT sales_january_check
+    CHECK (sale_date >= '2023-01-01' AND sale_date < '2023-02-01');
+ 
+ALTER TABLE sales_february ADD CONSTRAINT sales_february_check
+    CHECK (sale_date >= '2023-02-01' AND sale_date < '2023-03-01');
+ 
+ALTER TABLE sales_march ADD CONSTRAINT sales_march_check
+    CHECK (sale_date >= '2023-03-01' AND sale_date < '2023-04-01');
+[Yesterday 4:46 PM] Sathish Kumar Thiyagarajan (Unverified)
+CREATE TABLE products (
+    product_id SERIAL,
+    category TEXT,
+    product_name TEXT,
+    price numeric,
+    PRIMARY KEY (product_id, category)
+) partition by list(category);
+[Yesterday 4:48 PM] Sathish Kumar Thiyagarajan (Unverified)
+CREATE TABLE electronics PARTITION OF products
+    FOR VALUES IN ('Electronics');
+ 
+CREATE TABLE clothing PARTITION OF products
+    FOR VALUES IN ('Clothing');
+ 
+CREATE TABLE furniture PARTITION OF products
+    FOR VALUES IN ('Furniture');
+[Yesterday 4:49 PM] Sathish Kumar Thiyagarajan (Unverified)
+INSERT INTO products (category, product_name, price)
+VALUES ('Electronics', 'Smartphone', 500.00);
+ 
+INSERT INTO products (category, product_name, price)
+VALUES ('Clothing', 'T-Shirt', 25.00);
+ 
+INSERT INTO products (category, product_name, price)
+VALUES ('Furniture', 'Sofa', 800.00);
+```
+[Yesterday 4:59 PM] Sathish Kumar Thiyagarajan (Unverified)
+CREATE TABLE orders (
+    order_id SERIAL PRIMARY KEY,
+    order_date DATE,
+    customer_id INT,
+    total_amount NUMERIC
+) partition by hash(order_id);
+[Yesterday 5:00 PM] Sathish Kumar Thiyagarajan (Unverified)
+CREATE TABLE orders_1 PARTITION OF orders
+    FOR VALUES WITH (MODULUS 3, REMAINDER 0);
+ 
+CREATE TABLE orders_2 PARTITION OF orders
+    FOR VALUES WITH (MODULUS 3, REMAINDER 1);
+ 
+CREATE TABLE orders_3 PARTITION OF orders
+    FOR VALUES WITH (MODULUS 3, REMAINDER 2);
+[Yesterday 5:01 PM] Sathish Kumar Thiyagarajan (Unverified)
+INSERT INTO orders (order_date, customer_id, total_amount)
+VALUES ('2023-01-15', 101, 500.00);
+ 
+INSERT INTO orders (order_date, customer_id, total_amount)
+VALUES ('2023-02-20', 102, 600.00);
+ 
+INSERT INTO orders (order_date, customer_id, total_amount)
+VALUES ('2023-03-10', 103, 700.00);
+
+Date - 06-07-24
+
+1. micro service
+2. EDA
+3.pub/sub
+4. CDC
+
+
+
